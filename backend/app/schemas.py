@@ -7,11 +7,18 @@ class UploadResponse(BaseModel):
     char_count: int
     text: str
 
+class ImportantTopic(BaseModel):
+    topic: str
+    why_it_matters: str
+    gate_style_question: str
+
 class GenerateNotesRequest(BaseModel):
     text: str = Field(..., min_length=10, description="Cleaned lecture text")
 
 class GenerateNotesResponse(BaseModel):
-    notes: str
+    short_notes: List[str]
+    detailed_notes: str
+    important_topics: List[ImportantTopic]
 
 class QuizQuestion(BaseModel):
     question: str
@@ -24,3 +31,9 @@ class GenerateQuizRequest(BaseModel):
 
 class GenerateQuizResponse(BaseModel):
     quiz: List[QuizQuestion]
+
+class GenerateHotQuestionsRequest(BaseModel):
+    text: str = Field(..., min_length=10, description="Cleaned lecture text")
+
+class GenerateHotQuestionsResponse(BaseModel):
+    hot_questions: List[str]

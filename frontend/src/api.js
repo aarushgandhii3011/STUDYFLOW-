@@ -21,7 +21,7 @@ export async function uploadPdf(file) {
 }
 
 /**
- * Calls Gemini to generate condensed revision notes from extracted text.
+ * Calls Gemini to generate structured study guide (short notes, detailed notes, important topics).
  */
 export async function generateNotes(text) {
   const response = await fetch(`${API_BASE}/generate-notes`, {
@@ -51,6 +51,24 @@ export async function generateQuiz(text) {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.detail || 'Failed to generate interactive quiz');
+  }
+
+  return response.json();
+}
+
+/**
+ * Calls Gemini to generate 4 higher-order-thinking questions.
+ */
+export async function generateHotQuestions(text) {
+  const response = await fetch(`${API_BASE}/generate-hot-questions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to generate higher-order thinking questions');
   }
 
   return response.json();

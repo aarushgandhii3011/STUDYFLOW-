@@ -8,10 +8,16 @@ from app.schemas import (
     GenerateNotesRequest,
     GenerateNotesResponse,
     GenerateQuizRequest,
-    GenerateQuizResponse
+    GenerateQuizResponse,
+    GenerateHotQuestionsRequest,
+    GenerateHotQuestionsResponse
 )
 from app.services.pdf_service import extract_text_from_pdf_bytes
-from app.services.gemini_service import generate_condensed_notes, generate_quiz
+from app.services.gemini_service import (
+    generate_condensed_notes,
+    generate_quiz,
+    generate_hot_questions
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("studyflow.api")
@@ -85,11 +91,11 @@ async def upload_pdf(file: UploadFile = File(...)):
 @app.post("/generate-notes", response_model=GenerateNotesResponse, status_code=status.HTTP_200_OK)
 async def generate_notes_endpoint(payload: GenerateNotesRequest):
     """
-    Generates structured, condensed Markdown revision notes from extracted lecture text.
+    Generates structured study guide (short notes, detailed notes, important topics with GATE-style practice questions).
     """
     try:
-        notes = generate_condensed_notes(payload.text)
-        return GenerateNotesResponse(notes=notes)
+        result = generate_condensed_notes(payload.text)
+        return result
     except ValueError as e:
         logger.error(f"Configuration error: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -116,4 +122,22 @@ async def generate_quiz_endpoint(payload: GenerateQuizRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate quiz: {str(e)}"
+        )
+
+@app.post("/generate-hot-questions", response_model=GenerateHotQuestionsResponse, status_code=status.HTTP_200_OK)
+async def generate_hot_questions_endpoint(payload: GenerateHotQuestionsRequest):
+    """
+    Generates 4 higher-order-thinking questions requiring students to apply, analyze, compare, or evaluate concepts.
+    """
+    try:
+        questions = generate_hot_questions(payload.text)
+        return GenerateHotQuestionsResponse(hot_questions=questions)
+    except ValueError as e:
+        logger.error(f"Configuration error: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error generating hot questions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate higher-order questions: {str(e)}"
         )
