@@ -143,37 +143,60 @@ export default function App() {
     <div className="app-container">
       <Header hasResults={hasResults} onReset={handleReset} />
 
-      {/* Global Error Banner */}
-      {errorMessage && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          padding: '1.25rem 1.5rem',
-          borderRadius: 'var(--radius-md)',
-          background: 'var(--danger-bg)',
-          border: '1px solid var(--danger-border)',
-          color: '#fca5a5',
-          fontSize: '0.95rem',
-          lineHeight: 1.5
-        }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-            <AlertCircle size={22} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div>
-              <strong style={{ color: '#fff', display: 'block', marginBottom: '0.2rem' }}>Generation Error</strong>
-              <span>{errorMessage}</span>
+      {/* Global Error / Notice Banner */}
+      {errorMessage && (() => {
+        const isScanned = errorMessage.toLowerCase().includes('scanned document');
+        return (
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            padding: '1.25rem 1.5rem',
+            borderRadius: 'var(--radius-md)',
+            background: isScanned ? 'rgba(245, 158, 11, 0.12)' : 'var(--danger-bg)',
+            border: `1px solid ${isScanned ? 'rgba(245, 158, 11, 0.35)' : 'var(--danger-border)'}`,
+            color: isScanned ? '#fde68a' : '#fca5a5',
+            fontSize: '0.95rem',
+            lineHeight: 1.5
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', flex: '1 1 300px' }}>
+              <AlertCircle 
+                size={22} 
+                color={isScanned ? '#f59e0b' : '#ef4444'} 
+                style={{ flexShrink: 0, marginTop: '2px' }} 
+              />
+              <div>
+                <strong style={{ color: '#fff', display: 'block', marginBottom: '0.2rem' }}>
+                  {isScanned ? 'Scanned Document Detected' : 'Processing Error'}
+                </strong>
+                <span>{errorMessage}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+              {isScanned ? (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleReset}
+                >
+                  Upload Another File
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => file && startProcessing(file)}
+                >
+                  <RefreshCw size={14} /> Retry
+                </button>
+              )}
             </div>
           </div>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => file && startProcessing(file)}
-            style={{ flexShrink: 0 }}
-          >
-            <RefreshCw size={14} /> Retry
-          </button>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Upload View */}
       {!isLoading && !hasResults && (

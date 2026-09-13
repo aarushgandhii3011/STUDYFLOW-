@@ -62,6 +62,9 @@ def extract_text_from_pdf_bytes(pdf_bytes: bytes) -> Tuple[str, int]:
     cleaned = clean_extracted_text(raw_combined)
 
     if not cleaned or len(cleaned) < 10:
-        raise ValueError("Could not extract readable text from PDF. It may be a scanned image or empty.")
+        raise ValueError(
+            "This PDF appears to be a scanned document without selectable text. "
+            "Please upload a PDF with actual text content, or wait for OCR support in a future version."
+        )
 
     return cleaned, total_pages
